@@ -1,0 +1,341 @@
+﻿namespace CourseSearcher
+{
+    partial class CourseSeacherForm
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            btn1 = new Button();
+            pbWeb = new ProgressBar();
+            middlePanel = new Panel();
+            lastUpdateLabel = new Label();
+            pictureBox2 = new PictureBox();
+            label1 = new Label();
+            pictureBox1 = new PictureBox();
+            refreshCheckBox = new CheckBox();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            tableLayoutPanel2 = new TableLayoutPanel();
+            searchLabel = new Label();
+            enrollmentTextBox = new TextBox();
+            dataPanel = new Panel();
+            gridView = new DataGridView();
+            menuStrip1 = new MenuStrip();
+            fileToolStripMenuItem = new ToolStripMenuItem();
+            schoolsToolStripMenuItem = new ToolStripMenuItem();
+            exitToolStripMenuItem = new ToolStripMenuItem();
+            helpToolStripMenuItem = new ToolStripMenuItem();
+            aboutToolStripMenuItem = new ToolStripMenuItem();
+            middlePanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            tableLayoutPanel1.SuspendLayout();
+            tableLayoutPanel2.SuspendLayout();
+            dataPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)gridView).BeginInit();
+            menuStrip1.SuspendLayout();
+            SuspendLayout();
+            // 
+            // btn1
+            // 
+            btn1.Anchor = AnchorStyles.Bottom;
+            btn1.Location = new Point(53, 440);
+            btn1.Margin = new Padding(2);
+            btn1.Name = "btn1";
+            btn1.Size = new Size(182, 30);
+            btn1.TabIndex = 1;
+            btn1.Text = "Search";
+            btn1.UseVisualStyleBackColor = true;
+            btn1.Click += button1_Click;
+            // 
+            // pbWeb
+            // 
+            pbWeb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pbWeb.Location = new Point(5, 475);
+            pbWeb.Margin = new Padding(2);
+            pbWeb.Name = "pbWeb";
+            pbWeb.Size = new Size(277, 22);
+            pbWeb.TabIndex = 3;
+            // 
+            // middlePanel
+            // 
+            middlePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            middlePanel.AutoSize = true;
+            middlePanel.Controls.Add(lastUpdateLabel);
+            middlePanel.Controls.Add(pictureBox2);
+            middlePanel.Controls.Add(label1);
+            middlePanel.Controls.Add(pictureBox1);
+            middlePanel.Controls.Add(refreshCheckBox);
+            middlePanel.Controls.Add(pbWeb);
+            middlePanel.Controls.Add(btn1);
+            middlePanel.Location = new Point(294, 2);
+            middlePanel.Margin = new Padding(2);
+            middlePanel.Name = "middlePanel";
+            middlePanel.Size = new Size(288, 509);
+            middlePanel.TabIndex = 5;
+            // 
+            // lastUpdateLabel
+            // 
+            lastUpdateLabel.Anchor = AnchorStyles.Top;
+            lastUpdateLabel.Location = new Point(5, 346);
+            lastUpdateLabel.Name = "lastUpdateLabel";
+            lastUpdateLabel.Size = new Size(277, 20);
+            lastUpdateLabel.TabIndex = 9;
+            lastUpdateLabel.Text = "Last Update: AAAAAAAA";
+            lastUpdateLabel.TextAlign = ContentAlignment.MiddleCenter;
+            lastUpdateLabel.Visible = false;
+            // 
+            // pictureBox2
+            // 
+            pictureBox2.Image = Properties.Resources.GD_Benilde_Logo;
+            pictureBox2.Location = new Point(67, 227);
+            pictureBox2.Margin = new Padding(4, 3, 4, 3);
+            pictureBox2.Name = "pictureBox2";
+            pictureBox2.Size = new Size(154, 116);
+            pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox2.TabIndex = 8;
+            pictureBox2.TabStop = false;
+            // 
+            // label1
+            // 
+            label1.Dock = DockStyle.Top;
+            label1.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label1.Location = new Point(0, 0);
+            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(288, 47);
+            label1.TabIndex = 7;
+            label1.Text = "Available Course Searcher";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // pictureBox1
+            // 
+            pictureBox1.Image = Properties.Resources.smit_logo;
+            pictureBox1.Location = new Point(5, 50);
+            pictureBox1.Margin = new Padding(4, 3, 4, 3);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(277, 171);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 6;
+            pictureBox1.TabStop = false;
+            // 
+            // refreshCheckBox
+            // 
+            refreshCheckBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            refreshCheckBox.AutoSize = true;
+            refreshCheckBox.Location = new Point(5, 415);
+            refreshCheckBox.Margin = new Padding(4, 3, 4, 3);
+            refreshCheckBox.Name = "refreshCheckBox";
+            refreshCheckBox.Size = new Size(103, 19);
+            refreshCheckBox.TabIndex = 5;
+            refreshCheckBox.TabStop = false;
+            refreshCheckBox.Text = "Refresh Search";
+            refreshCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.AutoSize = true;
+            tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            tableLayoutPanel1.ColumnCount = 3;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 292F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 292F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 0);
+            tableLayoutPanel1.Controls.Add(dataPanel, 2, 0);
+            tableLayoutPanel1.Controls.Add(middlePanel, 1, 0);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(0, 24);
+            tableLayoutPanel1.Margin = new Padding(4, 3, 4, 3);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 1;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Size = new Size(1190, 513);
+            tableLayoutPanel1.TabIndex = 7;
+            // 
+            // tableLayoutPanel2
+            // 
+            tableLayoutPanel2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tableLayoutPanel2.ColumnCount = 1;
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel2.Controls.Add(searchLabel, 0, 0);
+            tableLayoutPanel2.Controls.Add(enrollmentTextBox, 0, 1);
+            tableLayoutPanel2.Location = new Point(4, 3);
+            tableLayoutPanel2.Margin = new Padding(4, 3, 4, 3);
+            tableLayoutPanel2.Name = "tableLayoutPanel2";
+            tableLayoutPanel2.RowCount = 2;
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 46F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle());
+            tableLayoutPanel2.Size = new Size(284, 507);
+            tableLayoutPanel2.TabIndex = 2;
+            // 
+            // searchLabel
+            // 
+            searchLabel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            searchLabel.AutoSize = true;
+            searchLabel.Font = new Font("Microsoft Sans Serif", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            searchLabel.Location = new Point(2, 0);
+            searchLabel.Margin = new Padding(2, 0, 2, 0);
+            searchLabel.Name = "searchLabel";
+            searchLabel.Size = new Size(280, 46);
+            searchLabel.TabIndex = 1;
+            searchLabel.Text = "Course/s to Search";
+            searchLabel.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // enrollmentTextBox
+            // 
+            enrollmentTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            enrollmentTextBox.BorderStyle = BorderStyle.FixedSingle;
+            enrollmentTextBox.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            enrollmentTextBox.Location = new Point(2, 48);
+            enrollmentTextBox.Margin = new Padding(2);
+            enrollmentTextBox.Multiline = true;
+            enrollmentTextBox.Name = "enrollmentTextBox";
+            enrollmentTextBox.Size = new Size(280, 481);
+            enrollmentTextBox.TabIndex = 0;
+            // 
+            // dataPanel
+            // 
+            dataPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dataPanel.Controls.Add(gridView);
+            dataPanel.Location = new Point(586, 2);
+            dataPanel.Margin = new Padding(2);
+            dataPanel.Name = "dataPanel";
+            dataPanel.Size = new Size(602, 509);
+            dataPanel.TabIndex = 6;
+            // 
+            // gridView
+            // 
+            gridView.AllowUserToAddRows = false;
+            gridView.AllowUserToDeleteRows = false;
+            gridView.AllowUserToOrderColumns = true;
+            gridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            gridView.BackgroundColor = SystemColors.ButtonFace;
+            gridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            gridView.Dock = DockStyle.Fill;
+            gridView.Location = new Point(0, 0);
+            gridView.Margin = new Padding(2);
+            gridView.Name = "gridView";
+            gridView.ReadOnly = true;
+            gridView.RowHeadersWidth = 51;
+            gridView.RowTemplate.Height = 24;
+            gridView.Size = new Size(602, 509);
+            gridView.TabIndex = 2;
+            // 
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, helpToolStripMenuItem, aboutToolStripMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(1190, 24);
+            menuStrip1.TabIndex = 8;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { schoolsToolStripMenuItem, exitToolStripMenuItem });
+            fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            fileToolStripMenuItem.Size = new Size(37, 20);
+            fileToolStripMenuItem.Text = "File";
+            // 
+            // schoolsToolStripMenuItem
+            // 
+            schoolsToolStripMenuItem.Name = "schoolsToolStripMenuItem";
+            schoolsToolStripMenuItem.Size = new Size(180, 22);
+            schoolsToolStripMenuItem.Text = "Filter Schools";
+            schoolsToolStripMenuItem.Click += schoolsToolStripMenuItem_Click;
+            // 
+            // exitToolStripMenuItem
+            // 
+            exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            exitToolStripMenuItem.Size = new Size(180, 22);
+            exitToolStripMenuItem.Text = "Exit";
+            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
+            // 
+            // helpToolStripMenuItem
+            // 
+            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            helpToolStripMenuItem.Size = new Size(44, 20);
+            helpToolStripMenuItem.Text = "Help";
+            helpToolStripMenuItem.Click += helpToolStripMenuItem_Click;
+            // 
+            // aboutToolStripMenuItem
+            // 
+            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            aboutToolStripMenuItem.Size = new Size(52, 20);
+            aboutToolStripMenuItem.Text = "About";
+            aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
+            // 
+            // CourseSeacherForm
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.ControlLightLight;
+            ClientSize = new Size(1190, 537);
+            Controls.Add(tableLayoutPanel1);
+            Controls.Add(menuStrip1);
+            MainMenuStrip = menuStrip1;
+            Margin = new Padding(2);
+            Name = "CourseSeacherForm";
+            Text = "Course Searcher";
+            middlePanel.ResumeLayout(false);
+            middlePanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
+            tableLayoutPanel2.ResumeLayout(false);
+            tableLayoutPanel2.PerformLayout();
+            dataPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)gridView).EndInit();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        #endregion
+        private System.Windows.Forms.Button btn1;
+        private System.Windows.Forms.ProgressBar pbWeb;
+        private System.Windows.Forms.Panel middlePanel;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.CheckBox refreshCheckBox;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.Label searchLabel;
+        private System.Windows.Forms.TextBox enrollmentTextBox;
+        private System.Windows.Forms.Panel dataPanel;
+        private System.Windows.Forms.DataGridView gridView;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label label1;
+        private PictureBox pictureBox2;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem fileToolStripMenuItem;
+        private ToolStripMenuItem exitToolStripMenuItem;
+        private ToolStripMenuItem helpToolStripMenuItem;
+        private ToolStripMenuItem aboutToolStripMenuItem;
+        private Label lastUpdateLabel;
+        private ToolStripMenuItem schoolsToolStripMenuItem;
+    }
+}
+
