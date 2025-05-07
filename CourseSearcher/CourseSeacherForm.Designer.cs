@@ -251,6 +251,8 @@
             // splitContainer1
             // 
             splitContainer1.Dock = DockStyle.Fill;
+            splitContainer1.FixedPanel = FixedPanel.Panel1;
+            splitContainer1.IsSplitterFixed = true;
             splitContainer1.Location = new Point(0, 0);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = Orientation.Horizontal;
@@ -265,6 +267,7 @@
             splitContainer1.Size = new Size(602, 509);
             splitContainer1.SplitterDistance = 47;
             splitContainer1.TabIndex = 3;
+            splitContainer1.TabStop = false;
             // 
             // showHiddenButton
             // 
