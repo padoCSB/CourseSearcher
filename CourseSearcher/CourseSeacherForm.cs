@@ -2,6 +2,7 @@
 using HtmlAgilityPack;
 using System.Text.Json;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace CourseSearcher
 {
@@ -29,7 +30,7 @@ namespace CourseSearcher
         private DataTable table = new DataTable();
         private List<ClassEnrollment> totalList = new List<ClassEnrollment>();
         private bool canPress = true;
-
+        private int columnToHide;
         private string PathName => Path.Combine(Environment.CurrentDirectory, "CourseData.json");
         public CourseSeacherForm()
         {
@@ -44,8 +45,14 @@ namespace CourseSearcher
                 }
                 gridView.DataSource = table;
             }
+            ToolStripItemEventHandler action = (x, y) => 
+            {
+                showToolStripMenuItem.Enabled = showToolStripMenuItem.DropDown.Items.Count > 0;
+            };
+            showToolStripMenuItem.DropDown.ItemAdded += action;
+            showToolStripMenuItem.DropDown.ItemRemoved += action;
 
-            showHiddenButton.Enabled = contextMenuStrip1.Items.Count > 0;
+            showToolStripMenuItem.DropDown.ItemClicked += contextMenuStrip1_ItemClicked;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -107,15 +114,26 @@ namespace CourseSearcher
                 }
             }
 
-            var searched = totalList?.OrderBy(x => x.Course)
-                .Where(y => string.IsNullOrEmpty(enrollmentTextBox.Text) ? (y.IsOpen || checkBoxIncludeClosed.Checked) : enrollmentTextBox.Text.ToUpper().Contains(y.Course) && (y.IsOpen || checkBoxIncludeClosed.Checked));
-
-            var allowCourse = FilterSchoolsForm.GetAllowCourses();
-            if (allowCourse != null && searched != null)
+            CreateGridView(totalList);
+            var criteria = new List<string>();
+            if (!string.IsNullOrEmpty(enrollmentTextBox.Text))
             {
-                searched = searched.Where(x => allowCourse.IsAllowed(x.School));
+                string text = enrollmentTextBox.Text.Replace('\n', ' ');
+                foreach (var course in text.Split(' '))
+                {
+                    criteria.Add($"Course like '%{course.Trim()}%'");
+                }
             }
-            CreateGridView(searched?.ToList());
+            string condition = string.Join(" OR ", criteria);
+            if (!checkBoxIncludeClosed.Checked)
+            {
+                if (!string.IsNullOrEmpty(condition))
+                {
+                    condition += " AND ";
+                }
+                condition += "Status = 'Open'";
+            }
+            table.DefaultView.RowFilter = condition;
             canPress = true;
         }
         private void SetLastUpdatedText(DateTime date)
@@ -177,8 +195,6 @@ namespace CourseSearcher
                 row[6] = enrollment.IsOpen ? "Open" : "Closed";
                 table.Rows.Add(row);
             }
-
-            gridView.DataSource = table;
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -192,7 +208,7 @@ namespace CourseSearcher
                 "Press the search button to search through all the available course offerings that are open.\n\n" +
                 "Tick the Refresh Search to get an updated search.\n\n" +
                 "To filter Schools, go to File > Filter Schools\n\n" +
-                "To hide columns, double click the column. \nTo show the column, click the Show Hidden Columns and click on the Column Name to show it again";
+                "To hide columns, right click the column head, and press Hide. \nTo show the column, right click any column head, press Show then click on the Column Name to show it again";
             MessageBox.Show(text, "Help");
         }
 
@@ -208,28 +224,34 @@ namespace CourseSearcher
             form.Show();
         }
 
-        private void gridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0)
-            {
-                string column = gridView.Columns[e.ColumnIndex].Name;
-                gridView.Columns[column].Visible = false;
-                contextMenuStrip1.Items.Add(column);
-                showHiddenButton.Enabled = contextMenuStrip1.Items.Count > 0;
-            }
-        }
-
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            contextMenuStrip1.Show(Cursor.Position);
-        }
-
         private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             var menuText = e.ClickedItem.Text;
             gridView.Columns[menuText].Visible = true;
-            contextMenuStrip1.Items.Remove(e.ClickedItem);
-            showHiddenButton.Enabled = contextMenuStrip1.Items.Count > 0;
+            showToolStripMenuItem.DropDown.Items.Remove(e.ClickedItem);
+        }
+
+        private void gridView_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var hti = gridView.HitTest(e.X, e.Y);
+                if (hti.RowY != 1)
+                    return;
+
+                columnToHide = hti.ColumnIndex;
+                contextMenuStrip2.Show(Cursor.Position);
+            }
+        }
+
+        private void contextMenuStrip2_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            var menuText = e.ClickedItem.Text;
+            if (menuText != "Hide")
+                return;
+            var column = gridView.Columns[columnToHide];
+            column.Visible = false;
+            showToolStripMenuItem.DropDown.Items.Add(column.Name);
         }
     }
 }
