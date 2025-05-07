@@ -191,7 +191,8 @@ namespace CourseSearcher
             string text = "Put in the COURSE CODE in the TextBox on the left. You can put multiple course codes by putting a space in between course codes.\n\n" +
                 "Press the search button to search through all the available course offerings that are open.\n\n" +
                 "Tick the Refresh Search to get an updated search.\n\n" +
-                "To filter Schools, go to File > Filter Schools";
+                "To filter Schools, go to File > Filter Schools\n\n" +
+                "To hide columns, double click the column. \nTo show the column, click the Show Hidden Columns and click on the Column Name to show it again";
             MessageBox.Show(text, "Help");
         }
 
