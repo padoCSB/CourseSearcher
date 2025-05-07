@@ -2,25 +2,25 @@
 
 namespace CourseSearcher
 {
-    public partial class AllowCourseForm : Form
+    public partial class FilterSchoolsForm : Form
     {
-        public class AllowCourses
+        public class FilteredCourses
         {
-            public bool SACP { get; set; }
-            public bool SNMA { get; set; }
-            public bool SED { get; set; }
-            public bool SDEAS { get; set; }
-            public bool SMIT { get; set; }
-            public bool SHRIM { get; set; }
-            public bool SMITCDP { get; set; }
-            public bool SDG { get; set; }
-            public bool SMS { get; set; }
-            public bool SDA { get; set; }
+            public bool SACP { get; set; } = true;
+            public bool SNMA { get; set; } = true;
+            public bool SED { get; set; } = true;
+            public bool SDEAS { get; set; } = true;
+            public bool SMIT { get; set; } = true;
+            public bool SHRIM { get; set; } = true;
+            public bool SMITCDP { get; set; } = true;
+            public bool SDG { get; set; } = true;
+            public bool SMS { get; set; } = true;
+            public bool SDA { get; set; } = true;
 
             public bool IsAllowed(string text)
             {
                 text = text.Replace("-", "");
-                var field = typeof(AllowCourses).GetProperties().SingleOrDefault(x => x.Name == text, null);
+                var field = typeof(FilteredCourses).GetProperties().SingleOrDefault(x => x.Name == text, null);
 
                 if (field == null)
                     return true;
@@ -34,54 +34,59 @@ namespace CourseSearcher
         }
 
         private static string AllowCoursePathName => Path.Combine(Environment.CurrentDirectory, "AllowedCourses.json");
-        public static AllowCourses? GetAllowCourses()
+        public static FilteredCourses? GetAllowCourses()
         {
             if (!File.Exists(AllowCoursePathName))
                 return null;
-            using (StreamReader sr = File.OpenText(AllowCoursePathName))
-            {
-                return JsonSerializer.Deserialize<AllowCourses>(sr.ReadToEnd());
-            }
-    }
-
-        public AllowCourseForm()
-        {
-            InitializeComponent();
-
-            if (File.Exists(AllowCoursePathName))
+            try
             {
                 using (StreamReader sr = File.OpenText(AllowCoursePathName))
                 {
-                    var data = JsonSerializer.Deserialize<AllowCourses>(sr.ReadToEnd());
-                    checkBoxSACP.Checked = data.SACP;
-                    checkBoxSNMA.Checked = data.SNMA;
-                    checkBoxSED.Checked = data.SED;
-                    checkBoxSMS.Checked = data.SMS;
-                    checkBoxSMITCDP.Checked = data.SMITCDP;
-                    checkBoxSMIT.Checked = data.SMITCDP;
-                    checkBoxSDG.Checked = data.SDG;
-                    checkBoxSDA.Checked = data.SDA;
-                    checkBoxSDEAS.Checked = data.SDEAS;
-                    checkBoxSHRIM.Checked = data.SHRIM;
+                    return JsonSerializer.Deserialize<FilteredCourses>(sr.ReadToEnd());
+                }
+            }
+            catch
+            {
+                File.Delete(AllowCoursePathName);
+
+                return new FilteredCourses();
+            }
+        }
+    
+
+        public FilterSchoolsForm()
+        {
+            InitializeComponent();
+
+            if (!File.Exists(AllowCoursePathName))
+                return;
+
+            var data = GetAllowCourses();
+            foreach (Control c in tableLayoutPanel1.Controls)
+            {
+                if (c is CheckBox box)
+                {
+                    string name = box.Name.Replace("checkBox", "");
+                    var property = data?.GetType().GetProperty(name);
+                    var val = property?.GetValue(data);
+                    box.Checked = val == null || (bool)val;
                 }
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            AllowCourses allowCourses = new AllowCourses()
+            FilteredCourses allowCourses = new FilteredCourses();
+            foreach (Control c in tableLayoutPanel1.Controls)
             {
-                SACP = checkBoxSACP.Checked,
-                SNMA = checkBoxSNMA.Checked,
-                SDA = checkBoxSDA.Checked,
-                SED = checkBoxSED.Checked,
-                SDEAS = checkBoxSDEAS.Checked,
-                SDG = checkBoxSDG.Checked,
-                SHRIM = checkBoxSHRIM.Checked,
-                SMIT = checkBoxSMIT.Checked,
-                SMITCDP = checkBoxSMITCDP.Checked,
-                SMS = checkBoxSMS.Checked
-            };
+                if (c is CheckBox box) 
+                {
+                    string name = box.Name.Replace("checkBox", "");
+                    var property = allowCourses.GetType().GetProperty(name);
+                    if (property == null) continue;
+                    property.SetValue(allowCourses, box.Checked);
+                }
+            }
 
             string serialize = JsonSerializer.Serialize(allowCourses);
 

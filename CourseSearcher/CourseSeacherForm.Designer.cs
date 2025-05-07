@@ -28,9 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             btn1 = new Button();
             pbWeb = new ProgressBar();
             middlePanel = new Panel();
+            checkBoxIncludeClosed = new CheckBox();
             lastUpdateLabel = new Label();
             pictureBox2 = new PictureBox();
             label1 = new Label();
@@ -41,6 +43,8 @@
             searchLabel = new Label();
             enrollmentTextBox = new TextBox();
             dataPanel = new Panel();
+            splitContainer1 = new SplitContainer();
+            showHiddenButton = new Button();
             gridView = new DataGridView();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
@@ -48,12 +52,17 @@
             exitToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
+            contextMenuStrip1 = new ContextMenuStrip(components);
             middlePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             dataPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gridView).BeginInit();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -83,6 +92,7 @@
             // 
             middlePanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             middlePanel.AutoSize = true;
+            middlePanel.Controls.Add(checkBoxIncludeClosed);
             middlePanel.Controls.Add(lastUpdateLabel);
             middlePanel.Controls.Add(pictureBox2);
             middlePanel.Controls.Add(label1);
@@ -95,6 +105,19 @@
             middlePanel.Name = "middlePanel";
             middlePanel.Size = new Size(288, 509);
             middlePanel.TabIndex = 5;
+            // 
+            // checkBoxIncludeClosed
+            // 
+            checkBoxIncludeClosed.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            checkBoxIncludeClosed.AutoSize = true;
+            checkBoxIncludeClosed.Location = new Point(179, 416);
+            checkBoxIncludeClosed.Margin = new Padding(4, 3, 4, 3);
+            checkBoxIncludeClosed.Name = "checkBoxIncludeClosed";
+            checkBoxIncludeClosed.Size = new Size(104, 19);
+            checkBoxIncludeClosed.TabIndex = 10;
+            checkBoxIncludeClosed.TabStop = false;
+            checkBoxIncludeClosed.Text = "Include Closed";
+            checkBoxIncludeClosed.UseVisualStyleBackColor = true;
             // 
             // lastUpdateLabel
             // 
@@ -218,12 +241,41 @@
             // dataPanel
             // 
             dataPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            dataPanel.Controls.Add(gridView);
+            dataPanel.Controls.Add(splitContainer1);
             dataPanel.Location = new Point(586, 2);
             dataPanel.Margin = new Padding(2);
             dataPanel.Name = "dataPanel";
             dataPanel.Size = new Size(602, 509);
             dataPanel.TabIndex = 6;
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.Dock = DockStyle.Fill;
+            splitContainer1.Location = new Point(0, 0);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.Controls.Add(showHiddenButton);
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(gridView);
+            splitContainer1.Size = new Size(602, 509);
+            splitContainer1.SplitterDistance = 47;
+            splitContainer1.TabIndex = 3;
+            // 
+            // showHiddenButton
+            // 
+            showHiddenButton.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            showHiddenButton.Location = new Point(15, 13);
+            showHiddenButton.Name = "showHiddenButton";
+            showHiddenButton.Size = new Size(146, 23);
+            showHiddenButton.TabIndex = 0;
+            showHiddenButton.Text = "Show Hidden Column";
+            showHiddenButton.UseVisualStyleBackColor = true;
+            showHiddenButton.Click += button1_Click_1;
             // 
             // gridView
             // 
@@ -240,8 +292,9 @@
             gridView.ReadOnly = true;
             gridView.RowHeadersWidth = 51;
             gridView.RowTemplate.Height = 24;
-            gridView.Size = new Size(602, 509);
+            gridView.Size = new Size(602, 458);
             gridView.TabIndex = 2;
+            gridView.CellDoubleClick += gridView_CellDoubleClick;
             // 
             // menuStrip1
             // 
@@ -262,14 +315,14 @@
             // schoolsToolStripMenuItem
             // 
             schoolsToolStripMenuItem.Name = "schoolsToolStripMenuItem";
-            schoolsToolStripMenuItem.Size = new Size(180, 22);
+            schoolsToolStripMenuItem.Size = new Size(144, 22);
             schoolsToolStripMenuItem.Text = "Filter Schools";
             schoolsToolStripMenuItem.Click += schoolsToolStripMenuItem_Click;
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(180, 22);
+            exitToolStripMenuItem.Size = new Size(144, 22);
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
@@ -286,6 +339,12 @@
             aboutToolStripMenuItem.Size = new Size(52, 20);
             aboutToolStripMenuItem.Text = "About";
             aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
+            // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(61, 4);
+            contextMenuStrip1.ItemClicked += contextMenuStrip1_ItemClicked;
             // 
             // CourseSeacherForm
             // 
@@ -308,6 +367,10 @@
             tableLayoutPanel2.ResumeLayout(false);
             tableLayoutPanel2.PerformLayout();
             dataPanel.ResumeLayout(false);
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)gridView).EndInit();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
@@ -336,6 +399,10 @@
         private ToolStripMenuItem aboutToolStripMenuItem;
         private Label lastUpdateLabel;
         private ToolStripMenuItem schoolsToolStripMenuItem;
+        private CheckBox checkBoxIncludeClosed;
+        private SplitContainer splitContainer1;
+        private Button showHiddenButton;
+        private ContextMenuStrip contextMenuStrip1;
     }
 }
 

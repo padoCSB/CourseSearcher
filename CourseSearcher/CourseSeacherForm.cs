@@ -1,7 +1,7 @@
 ﻿using System.Data;
-using System.Text;
 using HtmlAgilityPack;
 using System.Text.Json;
+using System.Windows.Forms;
 
 namespace CourseSearcher
 {
@@ -36,7 +36,7 @@ namespace CourseSearcher
             InitializeComponent();
             if (table.Columns.Count == 0)
             {
-                string[] columnNames = new string[] { "Course", "Section", "Day", "Time", "Room", "School" };
+                string[] columnNames = new string[] { "Course", "Section", "Day", "Time", "Room", "School", "Status" };
                 foreach (var item in columnNames)
                 {
                     DataColumn col = new DataColumn(item, typeof(string));
@@ -44,6 +44,8 @@ namespace CourseSearcher
                 }
                 gridView.DataSource = table;
             }
+
+            showHiddenButton.Enabled = contextMenuStrip1.Items.Count > 0;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -65,18 +67,26 @@ namespace CourseSearcher
                 pbWeb.Value = 0;
                 if (File.Exists(PathName) && !refreshCheckBox.Checked)
                 {
-                    using (StreamReader sr = File.OpenText(PathName))
+                    try
                     {
-                        var data = JsonSerializer.Deserialize<EnrollmentData>(sr.ReadToEnd());
-                        totalList = data.AllCourses;
-                        SetLastUpdatedText(data.LastUpdate);
+                        using (StreamReader sr = File.OpenText(PathName))
+                        {
+                            var data = JsonSerializer.Deserialize<EnrollmentData>(sr.ReadToEnd());
+                            totalList = data.AllCourses;
+                            SetLastUpdatedText(data.LastUpdate);
+                        }
+                        pbWeb.Value = pbWeb.Maximum;
                     }
-                    pbWeb.Value = pbWeb.Maximum;
+                    catch
+                    {
+                        File.Delete(PathName);
+                        totalList.Clear();
+                        GetAllCourses();
+                    }
                 }
                 else
                 {
                     var context = SynchronizationContext.Current;
-                    List<Task> tasks = new List<Task>();
                     await Task.Run(() =>
                     {
                         for (int i = 1; i <= MaxID; i++)
@@ -98,9 +108,9 @@ namespace CourseSearcher
             }
 
             var searched = totalList?.OrderBy(x => x.Course)
-                .Where(y => string.IsNullOrEmpty(enrollmentTextBox.Text) ? y.IsOpen : enrollmentTextBox.Text.ToUpper().Contains(y.Course) && y.IsOpen);
-            var listdata = searched.ToList().Count;
-            var allowCourse = AllowCourseForm.GetAllowCourses();
+                .Where(y => string.IsNullOrEmpty(enrollmentTextBox.Text) ? (y.IsOpen || checkBoxIncludeClosed.Checked) : enrollmentTextBox.Text.ToUpper().Contains(y.Course) && (y.IsOpen || checkBoxIncludeClosed.Checked));
+
+            var allowCourse = FilterSchoolsForm.GetAllowCourses();
             if (allowCourse != null && searched != null)
             {
                 searched = searched.Where(x => allowCourse.IsAllowed(x.School));
@@ -164,6 +174,7 @@ namespace CourseSearcher
                 row[3] = enrollment.Time;
                 row[4] = enrollment.Room;
                 row[5] = enrollment.School;
+                row[6] = enrollment.IsOpen ? "Open" : "Closed";
                 table.Rows.Add(row);
             }
 
@@ -179,7 +190,7 @@ namespace CourseSearcher
         {
             string text = "Put in the COURSE CODE in the TextBox on the left. You can put multiple course codes by putting a space in between course codes.\n\n" +
                 "Press the search button to search through all the available course offerings that are open.\n\n" +
-                "Tick the Refresh Search to get an updated search.\n\n"+
+                "Tick the Refresh Search to get an updated search.\n\n" +
                 "To filter Schools, go to File > Filter Schools";
             MessageBox.Show(text, "Help");
         }
@@ -192,8 +203,32 @@ namespace CourseSearcher
 
         private void schoolsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AllowCourseForm form = new AllowCourseForm();
+            FilterSchoolsForm form = new FilterSchoolsForm();
             form.Show();
+        }
+
+        private void gridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0)
+            {
+                string column = gridView.Columns[e.ColumnIndex].Name;
+                gridView.Columns[column].Visible = false;
+                contextMenuStrip1.Items.Add(column);
+                showHiddenButton.Enabled = contextMenuStrip1.Items.Count > 0;
+            }
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            contextMenuStrip1.Show(Cursor.Position);
+        }
+
+        private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            var menuText = e.ClickedItem.Text;
+            gridView.Columns[menuText].Visible = true;
+            contextMenuStrip1.Items.Remove(e.ClickedItem);
+            showHiddenButton.Enabled = contextMenuStrip1.Items.Count > 0;
         }
     }
 }

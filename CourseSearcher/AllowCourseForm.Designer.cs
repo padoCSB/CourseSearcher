@@ -1,6 +1,6 @@
 ﻿namespace CourseSearcher
 {
-    partial class AllowCourseForm
+    partial class FilterSchoolsForm
     {
         /// <summary>
         /// Required designer variable.
