@@ -1,9 +1,6 @@
 ﻿using System.Data;
 using HtmlAgilityPack;
 using System.Text.Json;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Reflection;
 
 namespace CourseSearcher
 {
@@ -46,6 +43,9 @@ namespace CourseSearcher
                 }
                 gridView.DataSource = table;
             }
+            showToolStripMenuItem.DropDown.Items.Add("Status");
+            showToolStripMenuItem.Enabled = true;
+            gridView.Columns["Status"].Visible = false;
             ToolStripItemEventHandler action = (x, y) => 
             {
                 showToolStripMenuItem.Enabled = showToolStripMenuItem.DropDown.Items.Count > 0;
@@ -54,15 +54,6 @@ namespace CourseSearcher
             showToolStripMenuItem.DropDown.ItemRemoved += action;
 
             showToolStripMenuItem.DropDown.ItemClicked += contextMenuStrip1_ItemClicked;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Cursor.Current = Cursors.WaitCursor;
-            if (!canPress) return;
-
-            GetAllCourses();
-            Cursor.Current = Cursors.Default;
         }
 
         private async void GetAllCourses()
@@ -90,6 +81,7 @@ namespace CourseSearcher
                         File.Delete(PathName);
                         totalList.Clear();
                         GetAllCourses();
+                        return;
                     }
                 }
                 else
@@ -115,51 +107,38 @@ namespace CourseSearcher
                 }
             }
 
-            CreateGridView(totalList);
-            var criteria = new List<string>();
+            List<string> conditionList = new List<string>();
+
             // Finding all courses
             if (!string.IsNullOrEmpty(enrollmentTextBox.Text))
             {
-                string text = enrollmentTextBox.Text.Replace('\n', ' ');
-                foreach (var course in text.Split(' '))
-                {
-                    if (string.IsNullOrEmpty(course))
-                        continue;
-
-                    criteria.Add($"Course like '%{course.Trim()}%'");
-                }
+                var criteria = enrollmentTextBox.Text.Replace('\n', ' ')
+                    .Split(' ')
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Select(y => $"Course like '%{y.Trim()}%'").ToList();
+                conditionList.Add($"({string.Join(" OR ", criteria)})");
             }
-            string condition = string.Join(" OR ", criteria);
-            
+
             // Exclude Closed status
             if (!checkBoxIncludeClosed.Checked)
             {
-                if (!string.IsNullOrEmpty(condition))
-                {
-                    condition = $"({condition}) AND ";
-                }
-                condition += "Status = 'Open'";
+                conditionList.Add("Status = 'Open'");
             }
 
             // Exclude Filtered Schools
-            var filteredSchools = FilterSchoolsForm.GetAllowCourses();
+            var filteredSchools = FilterSchoolsForm.GetFilteredCourses();
             if (filteredSchools != null)
             {
-                var schools = filteredSchools.GetType().GetProperties().Where(x =>
+                var schools = filteredSchools.GetSchoolList();
+                if (schools.Count > 0)
                 {
-                    var val = x.GetValue(filteredSchools);
-                    if(val is bool)
-                        return !(bool)val;
-                    return false;
-                }).Select(z=> z.GetCustomAttribute<CustomName>()?.Data ?? z.Name)
-                .Select(y=> $"School <> '{y}'").ToArray();
-                if (schools.Length > 0)
-                {
-                    string schoolFilter = $"({string.Join(" OR ", schools)})";
-                    condition += " AND " + schoolFilter;
+                    schools = schools.Select(y => $"School <> '{y}'").ToList();
+                    conditionList.Add($"({string.Join(" AND ", schools)})");
                 }
             }
-            table.DefaultView.RowFilter = condition;
+            table.DefaultView.RowFilter = string.Join(" AND ", conditionList);
+            
+            CreateRows(totalList);
             canPress = true;
         }
         private void SetLastUpdatedText(DateTime date)
@@ -179,7 +158,7 @@ namespace CourseSearcher
 
             File.WriteAllText(PathName, serialize);
         }
-        public void ConvertHtmlToPlainText(string html, List<ClassEnrollment> totalList)
+        private void ConvertHtmlToPlainText(string html, List<ClassEnrollment> totalList)
         {
             var web = new HtmlWeb();
             var document = web.Load(html);
@@ -203,10 +182,10 @@ namespace CourseSearcher
             }
         }
 
-        private void CreateGridView(List<ClassEnrollment>? enrollmentList)
+        private void CreateRows(List<ClassEnrollment>? enrollmentList)
         {
             table.Rows.Clear();
-            if (enrollmentList == null)
+            if (enrollmentList == null || enrollmentList.Count == 0)
                 return;
 
             foreach (ClassEnrollment enrollment in enrollmentList)
@@ -221,6 +200,15 @@ namespace CourseSearcher
                 row[6] = enrollment.IsOpen ? "Open" : "Closed";
                 table.Rows.Add(row);
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            if (!canPress) return;
+
+            GetAllCourses();
+            Cursor.Current = Cursors.Default;
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -251,10 +239,12 @@ namespace CourseSearcher
             form.SetDesktopLocation(Cursor.Position.X, Cursor.Position.Y);
         }
 
-        private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void contextMenuStrip1_ItemClicked(object? sender, ToolStripItemClickedEventArgs e)
         {
-            var menuText = e.ClickedItem.Text;
+            var menuText = e.ClickedItem?.Text;
             gridView.Columns[menuText].Visible = true;
+            if (e.ClickedItem == null)
+                return;
             showToolStripMenuItem.DropDown.Items.Remove(e.ClickedItem);
         }
 
@@ -273,7 +263,7 @@ namespace CourseSearcher
 
         private void contextMenuStrip2_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-            var menuText = e.ClickedItem.Text;
+            var menuText = e.ClickedItem?.Text;
             if (menuText != "Hide")
                 return;
             var column = gridView.Columns[columnToHide];

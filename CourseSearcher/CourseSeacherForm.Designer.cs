@@ -71,7 +71,7 @@
             // btn1
             // 
             btn1.Anchor = AnchorStyles.Bottom;
-            btn1.Location = new Point(53, 440);
+            btn1.Location = new Point(53, 464);
             btn1.Margin = new Padding(2);
             btn1.Name = "btn1";
             btn1.Size = new Size(182, 30);
@@ -83,7 +83,7 @@
             // pbWeb
             // 
             pbWeb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            pbWeb.Location = new Point(5, 475);
+            pbWeb.Location = new Point(5, 499);
             pbWeb.Margin = new Padding(2);
             pbWeb.Name = "pbWeb";
             pbWeb.Size = new Size(277, 22);
@@ -102,14 +102,14 @@
             middlePanel.Location = new Point(294, 2);
             middlePanel.Margin = new Padding(2);
             middlePanel.Name = "middlePanel";
-            middlePanel.Size = new Size(288, 509);
+            middlePanel.Size = new Size(288, 533);
             middlePanel.TabIndex = 5;
             // 
             // checkBoxIncludeClosed
             // 
             checkBoxIncludeClosed.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             checkBoxIncludeClosed.AutoSize = true;
-            checkBoxIncludeClosed.Location = new Point(179, 416);
+            checkBoxIncludeClosed.Location = new Point(179, 440);
             checkBoxIncludeClosed.Margin = new Padding(4, 3, 4, 3);
             checkBoxIncludeClosed.Name = "checkBoxIncludeClosed";
             checkBoxIncludeClosed.Size = new Size(104, 19);
@@ -144,7 +144,7 @@
             // 
             refreshCheckBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             refreshCheckBox.AutoSize = true;
-            refreshCheckBox.Location = new Point(5, 415);
+            refreshCheckBox.Location = new Point(5, 439);
             refreshCheckBox.Margin = new Padding(4, 3, 4, 3);
             refreshCheckBox.Name = "refreshCheckBox";
             refreshCheckBox.Size = new Size(103, 19);
@@ -156,7 +156,7 @@
             // lastUpdateLabel
             // 
             lastUpdateLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            lastUpdateLabel.Location = new Point(336, 13);
+            lastUpdateLabel.Location = new Point(390, 13);
             lastUpdateLabel.Name = "lastUpdateLabel";
             lastUpdateLabel.Size = new Size(263, 23);
             lastUpdateLabel.TabIndex = 9;
@@ -181,7 +181,7 @@
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 1;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.Size = new Size(1190, 513);
+            tableLayoutPanel1.Size = new Size(1244, 537);
             tableLayoutPanel1.TabIndex = 7;
             // 
             // tableLayoutPanel2
@@ -197,7 +197,7 @@
             tableLayoutPanel2.RowCount = 2;
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 46F));
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
-            tableLayoutPanel2.Size = new Size(284, 507);
+            tableLayoutPanel2.Size = new Size(284, 531);
             tableLayoutPanel2.TabIndex = 2;
             // 
             // searchLabel
@@ -232,7 +232,7 @@
             dataPanel.Location = new Point(586, 2);
             dataPanel.Margin = new Padding(2);
             dataPanel.Name = "dataPanel";
-            dataPanel.Size = new Size(602, 509);
+            dataPanel.Size = new Size(656, 533);
             dataPanel.TabIndex = 6;
             // 
             // splitContainer1
@@ -251,7 +251,7 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(gridView);
-            splitContainer1.Size = new Size(602, 509);
+            splitContainer1.Size = new Size(656, 533);
             splitContainer1.SplitterDistance = 47;
             splitContainer1.TabIndex = 3;
             splitContainer1.TabStop = false;
@@ -272,7 +272,7 @@
             gridView.ReadOnly = true;
             gridView.RowHeadersWidth = 51;
             gridView.RowTemplate.Height = 24;
-            gridView.Size = new Size(602, 458);
+            gridView.Size = new Size(656, 482);
             gridView.TabIndex = 2;
             gridView.MouseDown += gridView_MouseDown;
             // 
@@ -281,7 +281,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, helpToolStripMenuItem, aboutToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(1190, 24);
+            menuStrip1.Size = new Size(1244, 24);
             menuStrip1.TabIndex = 8;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -345,11 +345,12 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlLightLight;
-            ClientSize = new Size(1190, 537);
+            ClientSize = new Size(1244, 561);
             Controls.Add(tableLayoutPanel1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
             Margin = new Padding(2);
+            MinimumSize = new Size(1000, 600);
             Name = "CourseSeacherForm";
             Text = "Course Searcher";
             middlePanel.ResumeLayout(false);

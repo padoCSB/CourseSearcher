@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using System.Reflection;
 using System.Text.Json;
 
 namespace CourseSearcher
@@ -6,7 +6,7 @@ namespace CourseSearcher
     public partial class FilterSchoolsForm : Form
     {
         private static string AllowCoursePathName => Path.Combine(Environment.CurrentDirectory, "AllowedCourses.json");
-        public static FilteredCourses? GetAllowCourses()
+        public static FilteredCourses? GetFilteredCourses()
         {
             if (!File.Exists(AllowCoursePathName))
                 return null;
@@ -33,7 +33,7 @@ namespace CourseSearcher
             if (!File.Exists(AllowCoursePathName))
                 return;
 
-            var data = GetAllowCourses();
+            var data = GetFilteredCourses();
             foreach (Control c in tableLayoutPanel1.Controls)
             {
                 if (c is CheckBox box)
@@ -110,6 +110,19 @@ namespace CourseSearcher
             if (val == null) return true;
 
             return (bool)val;
+        }
+
+        public List<string> GetSchoolList(bool isOpen = false)
+        {
+            var schools = this.GetType().GetProperties().Where(x =>
+            {
+                var val = x.GetValue(this);
+                if (val is bool open)
+                    return open == isOpen;
+                return false;
+            }).Select(z => z.GetCustomAttribute<CustomName>()?.Data ?? z.Name).ToList();
+
+            return schools;
         }
     }
 }

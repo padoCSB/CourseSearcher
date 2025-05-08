@@ -7,12 +7,12 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <PackageIcon>benildelogo.png</PackageIcon>
-    <ApplicationIcon>benildelogo.ico</ApplicationIcon>
+    <ApplicationIcon>benildelogo (1).ico</ApplicationIcon>
     <AssemblyName>BenildeCourseSearcher</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="benildelogo.ico" />
+    <Content Include="benildelogo (1).ico" />
   </ItemGroup>
 
   <ItemGroup>
