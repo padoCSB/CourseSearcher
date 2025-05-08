@@ -258,11 +258,12 @@
             // 
             // gridView
             // 
+            gridView.AllowDrop = true;
             gridView.AllowUserToAddRows = false;
-            gridView.AllowUserToDeleteRows = false;
             gridView.AllowUserToOrderColumns = true;
             gridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             gridView.BackgroundColor = SystemColors.ButtonFace;
+            gridView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             gridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             gridView.Dock = DockStyle.Fill;
             gridView.Location = new Point(0, 0);

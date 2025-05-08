@@ -3,6 +3,7 @@ using HtmlAgilityPack;
 using System.Text.Json;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Reflection;
 
 namespace CourseSearcher
 {
@@ -116,22 +117,47 @@ namespace CourseSearcher
 
             CreateGridView(totalList);
             var criteria = new List<string>();
+            // Finding all courses
             if (!string.IsNullOrEmpty(enrollmentTextBox.Text))
             {
                 string text = enrollmentTextBox.Text.Replace('\n', ' ');
                 foreach (var course in text.Split(' '))
                 {
+                    if (string.IsNullOrEmpty(course))
+                        continue;
+
                     criteria.Add($"Course like '%{course.Trim()}%'");
                 }
             }
             string condition = string.Join(" OR ", criteria);
+            
+            // Exclude Closed status
             if (!checkBoxIncludeClosed.Checked)
             {
                 if (!string.IsNullOrEmpty(condition))
                 {
-                    condition += " AND ";
+                    condition = $"({condition}) AND ";
                 }
                 condition += "Status = 'Open'";
+            }
+
+            // Exclude Filtered Schools
+            var filteredSchools = FilterSchoolsForm.GetAllowCourses();
+            if (filteredSchools != null)
+            {
+                var schools = filteredSchools.GetType().GetProperties().Where(x =>
+                {
+                    var val = x.GetValue(filteredSchools);
+                    if(val is bool)
+                        return !(bool)val;
+                    return false;
+                }).Select(z=> z.GetCustomAttribute<CustomName>()?.Data ?? z.Name)
+                .Select(y=> $"School <> '{y}'").ToArray();
+                if (schools.Length > 0)
+                {
+                    string schoolFilter = $"({string.Join(" OR ", schools)})";
+                    condition += " AND " + schoolFilter;
+                }
             }
             table.DefaultView.RowFilter = condition;
             canPress = true;
@@ -221,7 +247,8 @@ namespace CourseSearcher
         private void schoolsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FilterSchoolsForm form = new FilterSchoolsForm();
-            form.Show();
+            form.Show(this);
+            form.SetDesktopLocation(Cursor.Position.X, Cursor.Position.Y);
         }
 
         private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -236,7 +263,7 @@ namespace CourseSearcher
             if (e.Button == MouseButtons.Right)
             {
                 var hti = gridView.HitTest(e.X, e.Y);
-                if (hti.RowY != 1)
+                if (hti.RowY != 1 || hti.ColumnX == 1)
                     return;
 
                 columnToHide = hti.ColumnIndex;
