@@ -1,18 +1,15 @@
 ﻿using HtmlAgilityPack;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CourseSearcher.DataHelpers
 {
+    public struct EnrollmentData
+    {
+        public DateTime LastUpdate { get; set; }
+        public List<ClassEnrollment> AllCourses { get; set; }
+    }
+
     public class CourseRetriever
     {
-        public struct EnrollmentData
-        {
-            public DateTime LastUpdate { get; set; }
-            public List<ClassEnrollment> AllCourses { get; set; }
-        }
-
         private static CourseRetriever? instance;
         public static CourseRetriever Instance
         {
@@ -121,8 +118,7 @@ namespace CourseSearcher.DataHelpers
 
         private void ConvertHtmlToPlainText(string html, List<ClassEnrollment> totalList)
         {
-            var web = new HtmlWeb();
-            var document = web.Load(html);
+            var document = new HtmlWeb().Load(html);
             var list = document.DocumentNode.QuerySelectorAll("tr").Skip(1);
             foreach (var a in list)
             {

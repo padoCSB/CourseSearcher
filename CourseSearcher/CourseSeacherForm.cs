@@ -55,7 +55,7 @@ namespace CourseSearcher
             {
                 Form form = new Form()
                 {
-                    Size = new Size(200, 100),
+                    Size = new Size(300, 70),
                     ShowIcon = false,
                     MaximizeBox = false,
                     MinimizeBox = false,
@@ -63,11 +63,12 @@ namespace CourseSearcher
                     StartPosition = FormStartPosition.CenterScreen,
                     ShowInTaskbar = true,
                     Text = "Initializing",
-                    
                 };
-                Label label = new Label() { Text = "Initializing data from SIS...", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font(FontFamily.GenericMonospace, 10) };
+                ProgressBar bar = new ProgressBar() { Dock = DockStyle.Bottom, Size = new Size(0,10)};
+                Label label = new Label() { Text = "Initializing data from SIS...", Dock = DockStyle.Top, TextAlign = ContentAlignment.MiddleCenter, Font = new Font(FontFamily.GenericMonospace, 10) };
                 form.Controls.Add(label);
-                await CourseRetriever.Instance.GetData(false, pbWeb,null, form.Show, form.Close);
+                form.Controls.Add(bar);
+                await CourseRetriever.Instance.GetData(false, bar, null, form.Show, form.Close);
                 form.Close();
             }
         }

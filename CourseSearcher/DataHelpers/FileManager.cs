@@ -1,12 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static CourseSearcher.DataHelpers.CourseRetriever;
 using static CourseSearcher.DataHelpers.Recorder;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CourseSearcher.DataHelpers
 {

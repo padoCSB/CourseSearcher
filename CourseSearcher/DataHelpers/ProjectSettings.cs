@@ -1,7 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Reflection;
-
-namespace CourseSearcher.DataHelpers
+﻿namespace CourseSearcher.DataHelpers
 {
     internal class ProjectSettings
     {

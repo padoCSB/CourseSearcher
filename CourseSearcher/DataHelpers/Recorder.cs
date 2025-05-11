@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace CourseSearcher.DataHelpers
+﻿namespace CourseSearcher.DataHelpers
 {
     public class Recorder : IResettable
     {
