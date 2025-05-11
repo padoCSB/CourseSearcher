@@ -1,5 +1,7 @@
 ﻿using HtmlAgilityPack;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CourseSearcher.DataHelpers
 {
@@ -27,17 +29,10 @@ namespace CourseSearcher.DataHelpers
         private const int MaxID = 10;
         private const string htmlSite = "https://apps.benilde.edu.ph/sis/reminders_actualcount.asp?id=";
 
-        private string PathName => Path.Combine(Environment.CurrentDirectory, "CourseData.json");
+        //private string PathName => Path.Combine(Environment.CurrentDirectory,"Data", "CourseData.json");
 
         private List<ClassEnrollment> totalList = new List<ClassEnrollment>();
-        public async Task<List<ClassEnrollment>> GetAllCourses()
-        {
-            if (totalList.Count == 0)
-            {
-                await GetData();
-            }
-            return totalList;
-        }
+        public List<ClassEnrollment> GetAllCourses => totalList;
 
         private CourseRetriever()
         {
@@ -52,55 +47,65 @@ namespace CourseSearcher.DataHelpers
             label.Text = $"Last Update: {date.ToString("MM-dd-yy hh:mm tt")}";
             label.Visible = true;
         }
-        public async Task GetData(bool forceLoad = false, ProgressBar? progressBar = null, Label? label = null)
+        public async Task GetData(bool forceLoad = false, ProgressBar? progressBar = null, Label? label = null, Action? onLoading = null, Action? onFinish = null)
         {
+            Cursor.Current = Cursors.WaitCursor;
             if (totalList.Count == 0 || forceLoad)
             {
-                totalList.Clear();
                 if (progressBar != null)
                 {
                     progressBar.Maximum = MaxID;
                     progressBar.Value = 0;
                 }
 
-                if (File.Exists(PathName) && !forceLoad)
+                if (FileManager.FileExists<EnrollmentData>() && !forceLoad)
                 {
-                    try
+                    EnrollmentData? d = FileManager.Load<EnrollmentData>();
+                    if(d != null)
                     {
-                        using (StreamReader sr = File.OpenText(PathName))
-                        {
-                            var data = JsonConvert.DeserializeObject<EnrollmentData>(sr.ReadToEnd());
-                            totalList = data.AllCourses;
-                            SetLastUpdatedText(label, data.LastUpdate);
-                        }
+                        EnrollmentData data = (EnrollmentData)d;
+                        totalList = data.AllCourses;
+                        SetLastUpdatedText(label, data.LastUpdate);
                         if (progressBar != null)
                         {
                             progressBar.Value = progressBar.Maximum;
                         }
                     }
-                    catch
+                    else
                     {
-                        File.Delete(PathName);
-                        totalList.Clear();
                         await GetData();
-                        return;
                     }
                 }
                 else
                 {
                     var context = SynchronizationContext.Current;
+                    var list = new List<ClassEnrollment>();
+                    if (onLoading != null)
+                        onLoading.Invoke();
                     await Task.Run(() =>
                     {
-                        for (int i = 1; i <= MaxID; i++)
+                        try
                         {
-                            string html = $"{htmlSite}{i}";
-                            ConvertHtmlToPlainText(html, totalList);
-                            if (progressBar != null)
+                            for (int i = 1; i <= MaxID; i++)
                             {
-                                context?.Post(_ => { progressBar.Value += 1; }, null);
+                                string html = $"{htmlSite}{i}";
+                                ConvertHtmlToPlainText(html, list);
+                                if (progressBar != null)
+                                {
+                                    context?.Post(_ => { progressBar.Value += 1; }, null);
+                                }
                             }
                         }
+                        catch
+                        {
+                            MessageBox.Show("Problem with loading the sites.");
+                            return;
+                        }
                     });
+                    if (onFinish != null)
+                        onFinish.Invoke();
+
+                    totalList = list;
                     EnrollmentData enrollmentData = new EnrollmentData()
                     {
                         AllCourses = totalList,
@@ -108,9 +113,10 @@ namespace CourseSearcher.DataHelpers
                     };
 
                     SetLastUpdatedText(label, enrollmentData.LastUpdate);
-                    SaveJSONData(enrollmentData);
+                    FileManager.Save(enrollmentData);
                 }
             }
+            Cursor.Current = Cursors.Default;
         }
 
         private void ConvertHtmlToPlainText(string html, List<ClassEnrollment> totalList)
@@ -137,17 +143,5 @@ namespace CourseSearcher.DataHelpers
             }
         }
 
-        private void SaveJSONData(EnrollmentData enrollmentData)
-        {
-            string serialize = JsonConvert.SerializeObject(enrollmentData);
-
-            // Check if file already exists. If yes, delete it.
-            if (File.Exists(PathName))
-            {
-                File.Delete(PathName);
-            }
-
-            File.WriteAllText(PathName, serialize);
-        }
     }
 }

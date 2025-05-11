@@ -24,6 +24,7 @@ namespace CourseSearcher
         public CourseSeacherForm()
         {
             InitializeComponent();
+
             if (table.Columns.Count == 0)
             {
                 string[] columnNames = new string[] { "Course", "Section", "Day", "Time", "Room", "School", "Status" };
@@ -45,6 +46,30 @@ namespace CourseSearcher
             showToolStripMenuItem.DropDown.ItemRemoved += action;
 
             showToolStripMenuItem.DropDown.ItemClicked += contextMenuStrip1_ItemClicked;
+            Init();
+        }
+
+        private async void Init()
+        {
+            if (CourseRetriever.Instance.GetAllCourses.Count == 0)
+            {
+                Form form = new Form()
+                {
+                    Size = new Size(200, 100),
+                    ShowIcon = false,
+                    MaximizeBox = false,
+                    MinimizeBox = false,
+                    TopMost = true,
+                    StartPosition = FormStartPosition.CenterScreen,
+                    ShowInTaskbar = true,
+                    Text = "Initializing",
+                    
+                };
+                Label label = new Label() { Text = "Initializing data from SIS...", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font(FontFamily.GenericMonospace, 10) };
+                form.Controls.Add(label);
+                await CourseRetriever.Instance.GetData(false, pbWeb,null, form.Show, form.Close);
+                form.Close();
+            }
         }
 
         private async void GetAllCourses()
@@ -53,10 +78,10 @@ namespace CourseSearcher
             await CourseRetriever.Instance.GetData(refreshCheckBox.Checked, pbWeb, lastUpdateLabel);
             
             List<ClassEnrollment> filteredList = new List<ClassEnrollment>();
-            filteredList = FilterListFromRecord(CourseRetriever.Instance.GetAllCourses().Result);
+            filteredList = FilterListFromRecord(CourseRetriever.Instance.GetAllCourses);
 
             if (filteredList == null || filteredList.Count == 0)
-                filteredList = CourseRetriever.Instance.GetAllCourses().Result;
+                filteredList = CourseRetriever.Instance.GetAllCourses;
 
             List<string> conditionList = new List<string>();
 

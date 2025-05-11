@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Reflection;
 
 namespace CourseSearcher.DataHelpers
 {
@@ -22,77 +23,54 @@ namespace CourseSearcher.DataHelpers
         {
 
         }
-        private string SavePathName => Path.Combine(Environment.CurrentDirectory, "ProjectSettings.json");
-        private ProjectSettingsData? ProjectSettingsData;
+        private ProjectSettingsData? data;
         public void SaveSettings(object[] args)
         {
-            if (ProjectSettingsData == null)
+            if (data == null)
             {
-                ProjectSettingsData = new ProjectSettingsData();
+                data = new ProjectSettingsData();
             }
             foreach (object item in args)
             {
                 if (item is FilteredCourses data)
                 {
-                    ProjectSettingsData.FilteredCourseData = data;
+                    this.data.FilteredCourses = data;
                 }
 
                 if (item is ColorData colorData)
                 {
-                    ProjectSettingsData.ColorData = colorData;
+                    this.data.ColorData = colorData;
                 }
             }
 
-            string serialize = JsonConvert.SerializeObject(ProjectSettingsData);
-
-            // Check if file already exists. If yes, delete it.
-            if (File.Exists(SavePathName))
-            {
-                File.Delete(SavePathName);
-            }
-
-            File.WriteAllText(SavePathName, serialize);
+            FileManager.Save(data);
         }
 
         public T GetData<T>()
         {
-            if (ProjectSettingsData == null)
-            {
-                if (!File.Exists(SavePathName))
-                {
-                    ProjectSettingsData = new ProjectSettingsData();
-                    SaveSettings([]);
-                }
-                else
-                {
-                    try
-                    {
-                        using (StreamReader sr = File.OpenText(SavePathName))
-                        {
-                            var b = JsonConvert.DeserializeObject<ProjectSettingsData>(sr.ReadToEnd());
-                            ProjectSettingsData = b;
-                        }
-                    }
-                    catch
-                    {
-                        File.Delete(SavePathName);
+            data = FileManager.Load<ProjectSettingsData>();
 
-                        SaveSettings([]);
-                    }
-                }
-            }
-            return (T)ProjectSettingsData?.GetType()?.GetProperty(typeof(T).Name)?.GetValue(ProjectSettingsData) ?? default;
+            var property = typeof(ProjectSettingsData).GetProperty(typeof(T).Name);
+            var val = (T)(Activator.CreateInstance<T>());
+            if (property == null)
+                return val;
+
+            var actualValue = (T)property.GetValue(data);
+            if (actualValue == null)
+                return val;
+
+            return actualValue;
         }
     }
 
     public class ProjectSettingsData
     {
-        public FilteredCourses FilteredCourseData { get; set; }
+        public FilteredCourses FilteredCourses { get; set; }
         public ColorData ColorData { get; set; }
 
         public ProjectSettingsData()
         {
-            FilteredCourseData = new FilteredCourses();
+            FilteredCourses = new FilteredCourses();
             ColorData = new ColorData();
         }
 

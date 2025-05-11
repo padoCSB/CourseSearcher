@@ -21,46 +21,20 @@ namespace CourseSearcher.DataHelpers
         }
 
         private RecordDatas data;
-        private static string PathName => Path.Combine(Environment.CurrentDirectory, "RecordData.json");
+        //private static string PathName => Path.Combine(Environment.CurrentDirectory,"Data", "RecordData.json");
 
         public RecordDatas LoadData(bool forceLoad = false)
         {
             if (data.Record != null && !forceLoad)
                 return data;
 
-            if (!File.Exists(PathName))
-            {
-                data = new RecordDatas();
-            }
-            else
-            {
-                try
-                {
-                    using (StreamReader sr = File.OpenText(PathName))
-                    {
-                        data = JsonConvert.DeserializeObject<RecordDatas>(sr.ReadToEnd());
-                    }
-                }
-                catch
-                {
-                    File.Delete(PathName);
-
-                    data = new RecordDatas();
-                }
-            }
-
+            data = FileManager.Load<RecordDatas>();
+           
             return data;
         }
         private void SaveData()
         {
-            string serialize = JsonConvert.SerializeObject(data);
-
-            if (File.Exists(PathName))
-            {
-                File.Delete(PathName);
-            }
-
-            File.WriteAllText(PathName, serialize);
+            FileManager.Save(data);
         }
         public void AddRecordData(RecordData recordData)
         {
@@ -122,10 +96,7 @@ namespace CourseSearcher.DataHelpers
 
         public void Reset()
         {
-            if (File.Exists(PathName))
-            {
-                File.Delete(PathName);
-            }
+            FileManager.DeleteFile<RecordDatas>();
 
             data = new RecordDatas();
             SaveData();

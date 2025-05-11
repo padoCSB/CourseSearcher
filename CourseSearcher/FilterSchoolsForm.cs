@@ -12,12 +12,15 @@ namespace CourseSearcher
             InitializeComponent();
 
             var data = ProjectSettings.Instance.GetData<FilteredCourses>();
+            if (data == null)
+                return;
+
             foreach (Control c in tableLayoutPanel1.Controls)
             {
                 if (c is CheckBox box)
                 {
                     string name = box.Name.Replace("checkBox", "");
-                    var property = data?.GetType().GetProperty(name);
+                    var property = data.GetType().GetProperty(name);
                     var val = property?.GetValue(data);
                     box.Checked = val == null || (bool)val;
                 }
@@ -70,7 +73,7 @@ namespace CourseSearcher
         public bool IsAllowed(string text)
         {
             text = text.Replace("-", "");
-            var field = typeof(FilteredCourses).GetProperties().SingleOrDefault(x => x.Name == text, null);
+            var field = typeof(FilteredCourses).GetProperties().SingleOrDefault(x => x?.Name == text, null);
 
             if (field == null)
                 return true;

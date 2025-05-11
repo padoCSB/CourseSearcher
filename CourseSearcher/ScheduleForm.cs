@@ -5,13 +5,27 @@ namespace CourseSearcher
     public partial class ScheduleForm : Form
     {
         private List<ButtonColumn> buttonColumns = new List<ButtonColumn>();
-        private ColorData colorData = new ColorData();
+        private ColorData? colorData = new ColorData();
+        private ColorData ColorData
+        {
+            get
+            {
+                if(colorData == null)
+                {
+                    colorData = new ColorData();
+                }
+                return colorData;
+            }
+            set
+            {
+                colorData = value;
+            }
+        }
         public ScheduleForm()
         {
             InitializeComponent();
             SetLoadData();
-            colorData = ProjectSettings.Instance.GetData<ColorData>();
-
+            ColorData = ProjectSettings.Instance.GetData<ColorData>();
             TimeSpan time = TimeSpan.FromHours(8);
             for (int i = 1; i <= 13; i++)
             {
@@ -28,7 +42,7 @@ namespace CourseSearcher
                 {
                     ButtonColumn panel = new ButtonColumn();
                     buttonColumns.Add(panel);
-                    panel.ColorData = colorData;
+                    panel.ColorData = ColorData;
                     tableLayoutPanel1.Controls.Add(panel);
                     tableLayoutPanel1.SetCellPosition(panel, new TableLayoutPanelCellPosition(i, j));
                     panel.Dock = DockStyle.Fill;
@@ -72,19 +86,19 @@ namespace CourseSearcher
             switch (toolName)
             {
                 case "Highlight":
-                    buttonColumns.ForEach(x => colorData.HighLightColor = colorDialog1.Color);
-                    colorData.HighLightColor = colorDialog1.Color;
+                    buttonColumns.ForEach(x => ColorData.HighLightColor = colorDialog1.Color);
+                    ColorData.HighLightColor = colorDialog1.Color;
                     break;
                 case "Selected":
-                    buttonColumns.ForEach(x => colorData.SelectColor = colorDialog1.Color);
-                    colorData.SelectColor = colorDialog1.Color;
+                    buttonColumns.ForEach(x => ColorData.SelectColor = colorDialog1.Color);
+                    ColorData.SelectColor = colorDialog1.Color;
                     break;
                 case "Hovering Selected":
-                    buttonColumns.ForEach(x => colorData.HoverColor = colorDialog1.Color);
-                    colorData.HoverColor = colorDialog1.Color;
+                    buttonColumns.ForEach(x => ColorData.HoverColor = colorDialog1.Color);
+                    ColorData.HoverColor = colorDialog1.Color;
                     break;
             }
-            ProjectSettings.Instance.SaveSettings([colorData]);
+            ProjectSettings.Instance.SaveSettings([ColorData]);
             RefreshColumns();
         }
 
@@ -100,8 +114,8 @@ namespace CourseSearcher
 
         private void ResetColors_Click(object sender, EventArgs e)
         {
-            ((IResettable)colorData).Reset();
-            ProjectSettings.Instance.SaveSettings([colorData]);
+            ColorData.Reset();
+            ProjectSettings.Instance.SaveSettings([ColorData]);
             RefreshColumns();
         }
 
@@ -215,12 +229,13 @@ namespace CourseSearcher
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var coursesToImport = textBox2.Text.ToUpper().Split(',').Select(x =>
+            var coursesToImport = textBox2.Text.ToUpper().Split(',').Where(y=> y.Trim().Split(' ').Length == 2).Select(x =>
             {
                 string[] split = x.Trim().Split(' ');
                 return new ClassEnrollment() { Course = split[0], Section = split[1] };
             });
-            var allCourses = CourseRetriever.Instance.GetAllCourses().Result;
+
+            var allCourses = CourseRetriever.Instance.GetAllCourses;
             allCourses = allCourses.Where(x => coursesToImport.Any(y => y.Course == x.Course && y.Section == x.Section)).ToList();
 
             List<BlockedTime> records = GetAllBlockedSlots();

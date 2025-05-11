@@ -12,9 +12,6 @@ namespace CourseSearcher
 {
     public partial class ButtonColumn : UserControl
     {
-        public string Day;
-        public TimeSpan timeSpan;
-        Color defaultColor;
         int tlpRow = -1;
         bool isMouseDown = false;
         public List<int> selectedRow = new List<int>();
