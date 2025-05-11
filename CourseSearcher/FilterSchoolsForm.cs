@@ -1,39 +1,17 @@
 ﻿using System.Reflection;
-using System.Text.Json;
+using CourseSearcher.DataHelpers;
 
 namespace CourseSearcher
 {
     public partial class FilterSchoolsForm : Form
     {
         private static string AllowCoursePathName => Path.Combine(Environment.CurrentDirectory, "AllowedCourses.json");
-        public static FilteredCourses? GetFilteredCourses()
-        {
-            if (!File.Exists(AllowCoursePathName))
-                return null;
-            try
-            {
-                using (StreamReader sr = File.OpenText(AllowCoursePathName))
-                {
-                    return JsonSerializer.Deserialize<FilteredCourses>(sr.ReadToEnd());
-                }
-            }
-            catch
-            {
-                File.Delete(AllowCoursePathName);
-
-                return new FilteredCourses();
-            }
-        }
-    
 
         public FilterSchoolsForm()
         {
             InitializeComponent();
 
-            if (!File.Exists(AllowCoursePathName))
-                return;
-
-            var data = GetFilteredCourses();
+            var data = ProjectSettings.Instance.GetData<FilteredCourses>();
             foreach (Control c in tableLayoutPanel1.Controls)
             {
                 if (c is CheckBox box)
@@ -60,15 +38,7 @@ namespace CourseSearcher
                 }
             }
 
-            string serialize = JsonSerializer.Serialize(allowCourses);
-
-            // Check if file already exists. If yes, delete it.
-            if (File.Exists(AllowCoursePathName))
-            {
-                File.Delete(AllowCoursePathName);
-            }
-
-            File.WriteAllText(AllowCoursePathName, serialize);
+            ProjectSettings.Instance.SaveSettings([allowCourses]);
             this.Close();
         }
 
@@ -83,7 +53,7 @@ namespace CourseSearcher
         public string Data { get; }
         public CustomName(string data) { Data = data; }
     }
-    public class FilteredCourses
+    public class FilteredCourses : IResettable
     {
         public bool SACP { get; set; } = true;
         public bool SNMA { get; set; } = true;
@@ -123,6 +93,15 @@ namespace CourseSearcher
             }).Select(z => z.GetCustomAttribute<CustomName>()?.Data ?? z.Name).ToList();
 
             return schools;
+        }
+
+        public void Reset()
+        {
+            var a = this.GetType().GetProperties().Where(x => x.GetType() == typeof(bool));
+            foreach (var item in a)
+            {
+                item.SetValue(this, true);
+            }
         }
     }
 }

@@ -1,35 +1,26 @@
 ﻿using System.Data;
-using HtmlAgilityPack;
-using System.Text.Json;
+using CourseSearcher.DataHelpers;
 
 namespace CourseSearcher
 {
+    public struct ClassEnrollment
+    {
+        public string Course { get; set; }
+        public string Section { get; set; }
+        public string Time { get; set; }
+        public string Day { get; set; }
+        public string Room { get; set; }
+        public bool IsOpen { get; set; }
+        public string School { get; set; }
+    }
+
     public partial class CourseSeacherForm : Form
     {
-        public struct EnrollmentData
-        {
-            public DateTime LastUpdate { get; set; }
-            public List<ClassEnrollment> AllCourses { get; set; }
-        }
-        public struct ClassEnrollment
-        {
-            public string Course { get; set; }
-            public string Section { get; set; }
-            public string Time { get; set; }
-            public string Day { get; set; }
-            public string Room { get; set; }
-            public bool IsOpen { get; set; }
-            public string School { get; set; }
-        }
-
-        private const int MaxID = 10;
-        private const string htmlSite = "https://apps.benilde.edu.ph/sis/reminders_actualcount.asp?id=";
 
         private DataTable table = new DataTable();
-        private List<ClassEnrollment> totalList = new List<ClassEnrollment>();
         private bool canPress = true;
         private int columnToHide;
-        private string PathName => Path.Combine(Environment.CurrentDirectory, "CourseData.json");
+
         public CourseSeacherForm()
         {
             InitializeComponent();
@@ -46,7 +37,7 @@ namespace CourseSearcher
             showToolStripMenuItem.DropDown.Items.Add("Status");
             showToolStripMenuItem.Enabled = true;
             gridView.Columns["Status"].Visible = false;
-            ToolStripItemEventHandler action = (x, y) => 
+            ToolStripItemEventHandler action = (x, y) =>
             {
                 showToolStripMenuItem.Enabled = showToolStripMenuItem.DropDown.Items.Count > 0;
             };
@@ -59,53 +50,13 @@ namespace CourseSearcher
         private async void GetAllCourses()
         {
             canPress = false;
-            if (totalList.Count == 0 || refreshCheckBox.Checked)
-            {
-                totalList.Clear();
-                pbWeb.Maximum = MaxID;
-                pbWeb.Value = 0;
-                if (File.Exists(PathName) && !refreshCheckBox.Checked)
-                {
-                    try
-                    {
-                        using (StreamReader sr = File.OpenText(PathName))
-                        {
-                            var data = JsonSerializer.Deserialize<EnrollmentData>(sr.ReadToEnd());
-                            totalList = data.AllCourses;
-                            SetLastUpdatedText(data.LastUpdate);
-                        }
-                        pbWeb.Value = pbWeb.Maximum;
-                    }
-                    catch
-                    {
-                        File.Delete(PathName);
-                        totalList.Clear();
-                        GetAllCourses();
-                        return;
-                    }
-                }
-                else
-                {
-                    var context = SynchronizationContext.Current;
-                    await Task.Run(() =>
-                    {
-                        for (int i = 1; i <= MaxID; i++)
-                        {
-                            string html = $"{htmlSite}{i}";
-                            ConvertHtmlToPlainText(html, totalList);
-                            context?.Post(_ => { pbWeb.Value += 1; }, null);
-                        }
-                    });
-                    EnrollmentData enrollmentData = new EnrollmentData()
-                    {
-                        AllCourses = totalList,
-                        LastUpdate = DateTime.Now
-                    };
+            await CourseRetriever.Instance.GetData(refreshCheckBox.Checked, pbWeb, lastUpdateLabel);
+            
+            List<ClassEnrollment> filteredList = new List<ClassEnrollment>();
+            filteredList = FilterListFromRecord(CourseRetriever.Instance.GetAllCourses().Result);
 
-                    SetLastUpdatedText(enrollmentData.LastUpdate);
-                    SaveJSONData(enrollmentData);
-                }
-            }
+            if (filteredList == null || filteredList.Count == 0)
+                filteredList = CourseRetriever.Instance.GetAllCourses().Result;
 
             List<string> conditionList = new List<string>();
 
@@ -126,7 +77,7 @@ namespace CourseSearcher
             }
 
             // Exclude Filtered Schools
-            var filteredSchools = FilterSchoolsForm.GetFilteredCourses();
+            var filteredSchools = ProjectSettings.Instance.GetData<FilteredCourses>();
             if (filteredSchools != null)
             {
                 var schools = filteredSchools.GetSchoolList();
@@ -137,49 +88,22 @@ namespace CourseSearcher
                 }
             }
             table.DefaultView.RowFilter = string.Join(" AND ", conditionList);
-            
-            CreateRows(totalList);
+
+            CreateRows(filteredList);
             canPress = true;
         }
-        private void SetLastUpdatedText(DateTime date)
-        {
-            lastUpdateLabel.Text = $"Last Update: {date.ToString("MM-dd-yy hh:mm tt")}";
-            lastUpdateLabel.Visible = true;
-        }
-        private void SaveJSONData(EnrollmentData enrollmentData)
-        {
-            string serialize = JsonSerializer.Serialize(enrollmentData);
 
-            // Check if file already exists. If yes, delete it.
-            if (File.Exists(PathName))
+        private List<ClassEnrollment>? FilterListFromRecord(List<ClassEnrollment> list)
+        {
+            if (!Recorder.Instance.NameExist(comboBox1.Text.Trim()))
             {
-                File.Delete(PathName);
+                return null;
             }
 
-            File.WriteAllText(PathName, serialize);
-        }
-        private void ConvertHtmlToPlainText(string html, List<ClassEnrollment> totalList)
-        {
-            var web = new HtmlWeb();
-            var document = web.Load(html);
-            var list = document.DocumentNode.QuerySelectorAll("tr").Skip(1);
-            foreach (var a in list)
-            {
-                var text = a.InnerText;
-                var arr = text.Split('\n').Select(y => y.Replace("&nbsp;", "").Trim()).Skip(2).ToArray();
-                ClassEnrollment classEnrollment = new ClassEnrollment
-                {
-                    Course = arr[0],
-                    Section = arr[1],
-                    Day = arr[2],
-                    Time = arr[3],
-                    Room = arr[4],
-                    IsOpen = arr[6] == "Open",
-                    School = arr[8]
-                };
+            var data = Recorder.Instance.GetData(comboBox1.Text.Trim());
+            if (data == null) { return null; }
 
-                totalList.Add(classEnrollment);
-            }
+            return list.Where(x => data.IsAllowed(x.Day, x.Time)).ToList();
         }
 
         private void CreateRows(List<ClassEnrollment>? enrollmentList)
@@ -270,5 +194,25 @@ namespace CourseSearcher
             column.Visible = false;
             showToolStripMenuItem.DropDown.Items.Add(column.Name);
         }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_DropDown(object sender, EventArgs e)
+        {
+            comboBox1.Items.Clear();
+
+            comboBox1.Items.AddRange(Recorder.Instance.GetAllNames().ToArray());
+        }
+
+        private void createTSM_Click(object sender, EventArgs e)
+        {
+            Form schedForm = new ScheduleForm();
+            schedForm.ShowDialog(this);
+        }
     }
+
+    
 }
