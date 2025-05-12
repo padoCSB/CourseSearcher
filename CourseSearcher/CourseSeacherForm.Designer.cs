@@ -113,7 +113,6 @@
             comboBox1.Size = new Size(272, 23);
             comboBox1.TabIndex = 1;
             comboBox1.DropDown += comboBox1_DropDown;
-            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
             // 
             // checkBoxIncludeClosed
             // 

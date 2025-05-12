@@ -55,21 +55,22 @@ namespace CourseSearcher
             {
                 Form form = new Form()
                 {
-                    Size = new Size(300, 70),
+                    Size = new Size(750, 250),
                     ShowIcon = false,
                     MaximizeBox = false,
                     MinimizeBox = false,
                     TopMost = true,
                     StartPosition = FormStartPosition.CenterScreen,
                     ShowInTaskbar = true,
+                    SizeGripStyle = SizeGripStyle.Hide,
+                    FormBorderStyle = FormBorderStyle.FixedSingle,
                     Text = "Initializing",
                 };
                 ProgressBar bar = new ProgressBar() { Dock = DockStyle.Bottom, Size = new Size(0,10)};
-                Label label = new Label() { Text = "Initializing data from SIS...", Dock = DockStyle.Top, TextAlign = ContentAlignment.MiddleCenter, Font = new Font(FontFamily.GenericMonospace, 10) };
-                form.Controls.Add(label);
+                TextBox textBox = new TextBox() { Dock = DockStyle.Fill, TextAlign = HorizontalAlignment.Left, Font = new Font(FontFamily.GenericMonospace, 8.5f), Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical};
+                form.Controls.Add(textBox);
                 form.Controls.Add(bar);
-                await CourseRetriever.Instance.GetData(false, bar, null, form.Show, form.Close);
-                form.Close();
+                await CourseRetriever.Instance.GetData(false, bar, null, textBox, form);
             }
         }
 
@@ -178,7 +179,7 @@ namespace CourseSearcher
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string text = "This is a Course Searcher to find available courses for the term.\nThe data is taken from the SIS page from the Course Offerings.\n\nCreated by the SMIT-IEMC.";
+            string text = "This is a Course Searcher to find available courses for the term.\nThe data is taken from the SIS page from the Course Offerings.\n\nCreated by the SMIT-IEMC faculty.";
             MessageBox.Show(text, "About");
         }
 
@@ -219,11 +220,6 @@ namespace CourseSearcher
             var column = gridView.Columns[columnToHide];
             column.Visible = false;
             showToolStripMenuItem.DropDown.Items.Add(column.Name);
-        }
-
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void comboBox1_DropDown(object sender, EventArgs e)

@@ -1,9 +1,13 @@
 ﻿using HtmlAgilityPack;
+using System.Windows.Forms;
 
 namespace CourseSearcher.DataHelpers
 {
     public struct EnrollmentData
     {
+        public EnrollmentData() {
+            AllCourses = new List<ClassEnrollment>();
+        }
         public DateTime LastUpdate { get; set; }
         public List<ClassEnrollment> AllCourses { get; set; }
     }
@@ -27,9 +31,9 @@ namespace CourseSearcher.DataHelpers
         private const string htmlSite = "https://apps.benilde.edu.ph/sis/reminders_actualcount.asp?id=";
 
         //private string PathName => Path.Combine(Environment.CurrentDirectory,"Data", "CourseData.json");
+        private EnrollmentData enrollmentData = new EnrollmentData();
 
-        private List<ClassEnrollment> totalList = new List<ClassEnrollment>();
-        public List<ClassEnrollment> GetAllCourses => totalList;
+        public List<ClassEnrollment> GetAllCourses => enrollmentData.AllCourses;
 
         private CourseRetriever()
         {
@@ -44,10 +48,10 @@ namespace CourseSearcher.DataHelpers
             label.Text = $"Last Update: {date.ToString("MM-dd-yy hh:mm tt")}";
             label.Visible = true;
         }
-        public async Task GetData(bool forceLoad = false, ProgressBar? progressBar = null, Label? label = null, Action? onLoading = null, Action? onFinish = null)
+        public async Task GetData(bool forceLoad = false, ProgressBar? progressBar = null, Label? lastUpateLabel = null, TextBox? currentActionLabel = null, Form? form = null)
         {
             Cursor.Current = Cursors.WaitCursor;
-            if (totalList.Count == 0 || forceLoad)
+            if (GetAllCourses.Count == 0 || forceLoad)
             {
                 if (progressBar != null)
                 {
@@ -57,12 +61,10 @@ namespace CourseSearcher.DataHelpers
 
                 if (FileManager.FileExists<EnrollmentData>() && !forceLoad)
                 {
-                    EnrollmentData? d = FileManager.Load<EnrollmentData>();
-                    if(d != null)
+                    EnrollmentData? data = FileManager.Load<EnrollmentData>();
+                    if(data != null)
                     {
-                        EnrollmentData data = (EnrollmentData)d;
-                        totalList = data.AllCourses;
-                        SetLastUpdatedText(label, data.LastUpdate);
+                        enrollmentData = (EnrollmentData)data;
                         if (progressBar != null)
                         {
                             progressBar.Value = progressBar.Maximum;
@@ -75,51 +77,65 @@ namespace CourseSearcher.DataHelpers
                 }
                 else
                 {
-                    var context = SynchronizationContext.Current;
-                    var list = new List<ClassEnrollment>();
-                    if (onLoading != null)
-                        onLoading.Invoke();
-                    await Task.Run(() =>
+                    var htmlData = await GetHTMLData(progressBar, form);
+                    var list = htmlData;
+                    enrollmentData = new EnrollmentData()
                     {
-                        try
-                        {
-                            for (int i = 1; i <= MaxID; i++)
-                            {
-                                string html = $"{htmlSite}{i}";
-                                ConvertHtmlToPlainText(html, list);
-                                if (progressBar != null)
-                                {
-                                    context?.Post(_ => { progressBar.Value += 1; }, null);
-                                }
-                            }
-                        }
-                        catch
-                        {
-                            MessageBox.Show("Problem with loading the sites.");
-                            return;
-                        }
-                    });
-                    if (onFinish != null)
-                        onFinish.Invoke();
-
-                    totalList = list;
-                    EnrollmentData enrollmentData = new EnrollmentData()
-                    {
-                        AllCourses = totalList,
+                        AllCourses = list,
                         LastUpdate = DateTime.Now
                     };
 
-                    SetLastUpdatedText(label, enrollmentData.LastUpdate);
                     FileManager.Save(enrollmentData);
                 }
             }
+
+            SetLastUpdatedText(lastUpateLabel, enrollmentData.LastUpdate);
             Cursor.Current = Cursors.Default;
         }
 
-        private void ConvertHtmlToPlainText(string html, List<ClassEnrollment> totalList)
+        private async Task<List<ClassEnrollment>> GetHTMLData(ProgressBar? progressBar, Form? form)
         {
-            var document = new HtmlWeb().Load(html);
-            var list = document.DocumentNode.QuerySelectorAll("tr").Skip(1);
+            form?.Show();
+            TextBox currentActionLabel = form?.Controls.OfType<TextBox>().SingleOrDefault();
+            void AddText(string text)
+            {
+                if (currentActionLabel != null)
+                    currentActionLabel.AppendText(text);
+            }
+
+            var context = SynchronizationContext.Current;
+            var list = new List<ClassEnrollment>();
+            AddText("Retrieving data from SIS...\n");
+            AddText(Environment.NewLine);
+            try
+            {
+                for (int i = 1; i <= MaxID; i++)
+                {
+                    string html = $"{htmlSite}{i}";
+                    AddText($"Getting data from {html}...");
+                    await ConvertHtmlToPlainText(html, list);
+                    if (progressBar != null)
+                    {
+                        context?.Post(_ => { progressBar.Value += 1; }, null);
+                    }
+                    AddText("Done!");
+                    AddText(Environment.NewLine);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddText($"\nRetrieval failed!\n{ex.Message}");
+                return list;
+            }
+            AddText($"\nRetrieval successful!");
+            return list;
+        }
+
+        private async Task ConvertHtmlToPlainText(string html, List<ClassEnrollment> totalList)
+        {
+            var document = new HtmlWeb().LoadFromWebAsync(html);
+            await document;
+            var list = document.Result.DocumentNode.QuerySelectorAll("tr").Skip(1);
             foreach (var a in list)
             {
                 var text = a.InnerText;
