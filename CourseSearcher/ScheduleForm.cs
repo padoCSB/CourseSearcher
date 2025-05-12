@@ -1,11 +1,17 @@
 ﻿using CourseSearcher.DataHelpers;
+using System.Windows.Forms;
 
 namespace CourseSearcher
 {
     public partial class ScheduleForm : Form
     {
-        private List<ButtonColumn> buttonColumns = new List<ButtonColumn>();
+        const int Rows = 13;
+        const int Columns = 6;
+        const int Div = 6;
+        private List<TimeColumn> buttonColumns = new List<TimeColumn>();
         private ColorData? colorData = new ColorData();
+        private List<TimeColumn> interactedColumns = new List<TimeColumn>();
+        private TimeColumn? latestColumn;
         private ColorData ColorData
         {
             get
@@ -27,7 +33,7 @@ namespace CourseSearcher
             SetLoadData();
             ColorData = ProjectSettings.Instance.GetData<ColorData>();
             TimeSpan time = TimeSpan.FromHours(8);
-            for (int i = 1; i <= 13; i++)
+            for (int i = 1; i <= Rows; i++)
             {
                 if (tableLayoutPanel1.GetControlFromPosition(0, i) is Label label)
                 {
@@ -36,11 +42,11 @@ namespace CourseSearcher
                 }
             }
 
-            for (int i = 1; i <= 6; i++)
+            for (int i = 1; i <= Columns; i++)
             {
-                for (int j = 1; j <= 13; j++)
+                for (int j = 1; j <= Rows; j++)
                 {
-                    ButtonColumn panel = new ButtonColumn();
+                    TimeColumn panel = new TimeColumn();
                     buttonColumns.Add(panel);
                     panel.ColorData = ColorData;
                     tableLayoutPanel1.Controls.Add(panel);
@@ -50,10 +56,83 @@ namespace CourseSearcher
                 }
             }
 
+            MouseHandler gmh = new MouseHandler();
+            gmh.MouseMove += Gmh_MouseMove;
+            gmh.MouseDown += Gmh_MouseDown;
+            gmh.MouseUp += Gmh_MouseUp;
+            Application.AddMessageFilter(gmh);
+
             highlightToolStripMenuItem.Click += ColorStripMenu_Click;
             selectedToolStripMenuItem.Click += ColorStripMenu_Click;
             hoveringSelectedToolStripMenuItem.Click += ColorStripMenu_Click;
         }
+        #region MouseEvents
+        private void Gmh_MouseUp(Point point)
+        {
+            foreach (TimeColumn column in interactedColumns)
+            {
+                column.MouseUpOnPanel(point);
+            }
+
+            latestColumn = null;
+        }
+
+        private void Gmh_MouseDown(Point point)
+        {
+            Control? control = GetControlOnPoint(point);
+            if (control is TimeColumn column)
+            {
+                if (!interactedColumns.Contains(column))
+                {
+                    interactedColumns.Add(column);
+                }
+
+                column.MouseDownOnPanel(point);
+
+                latestColumn = column;
+            }
+        }
+
+        private void Gmh_MouseMove(Point point, bool isPressed)
+        {
+            Control? control = GetControlOnPoint(point);
+
+            if (control is TimeColumn column)
+            {
+                if (isPressed)
+                {
+                    if (!interactedColumns.Contains(column))
+                    {
+                        interactedColumns.Add(column);
+                        column.MouseDownOnPanel(point);
+                    }
+                }
+
+                if (latestColumn == null)
+                {
+                    latestColumn = column;
+                }
+                else if (latestColumn != column)
+                {
+                    latestColumn.MouseLeftPanel(point);
+                    latestColumn = column;
+                }
+
+                column.MouseMoveOnPanel(point, isPressed);
+            }
+            else if (latestColumn != null)
+            {
+                latestColumn.MouseLeftPanel(point);
+                latestColumn = null;
+            }
+        }
+
+        private Control? GetControlOnPoint(Point point)
+        {
+            Point newPoint = tableLayoutPanel1.PointToClient(point);
+            return tableLayoutPanel1.GetChildAtPoint(newPoint);
+        }
+        #endregion
 
         private void SetLoadData()
         {
@@ -134,7 +213,7 @@ namespace CourseSearcher
         private List<BlockedTime> GetBlockedSlots(int day = 0)
         {
             var a = Enumerable.Range(1, tableLayoutPanel1.RowCount)
-                 .Select(x => ((ButtonColumn)tableLayoutPanel1.GetControlFromPosition(day + 1, x))?.GetBlockedSlots())
+                 .Select(x => ((TimeColumn)tableLayoutPanel1.GetControlFromPosition(day + 1, x))?.GetBlockedSlots())
                  .Where(z => z != null)
                  .SelectMany(y => y).ToList();
 
@@ -167,7 +246,7 @@ namespace CourseSearcher
         private List<BlockedTime> GetAllBlockedSlots()
         {
             List<BlockedTime> records = new List<BlockedTime>();
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < Columns; i++)
             {
                 var a = GetBlockedSlots(i);
                 if (a.Count > 0)
@@ -189,17 +268,16 @@ namespace CourseSearcher
 
         private void BlockTimeData(BlockedTime item)
         {
-            // 13 rows
             int minutes = 10;
             TimeSpan adjusted = new TimeSpan(0, item.Start.Hours - 8, item.Start.Minutes, 0);
             TimeSpan adjustedEnd = new TimeSpan(0, item.End.Hours - 8, item.End.Minutes, 0);
-            int rowIndex = (item.Start.Days * 13);
+            int rowIndex = (item.Start.Days * Rows);
 
             while (adjusted.CompareTo(adjustedEnd) < 0)
             {
                 int currentRowIndex = rowIndex + (int)Math.Floor((float)adjusted.TotalMinutes / 60f);
                 int index = (int)(Math.Floor(adjusted.TotalMinutes % 60 / minutes));
-                buttonColumns[currentRowIndex].selectedRow.Add(index);
+                buttonColumns[currentRowIndex].AddToSelected(index);
                 adjusted = adjusted.Add(new TimeSpan(0, minutes, 0));
             }
         }
@@ -221,7 +299,6 @@ namespace CourseSearcher
             }
             RefreshColumns();
         }
-
         private void clearBtn_Click(object sender, EventArgs e)
         {
             ClearAllColumns();
@@ -291,6 +368,17 @@ namespace CourseSearcher
         {
             ClearAllColumns();
         }
+
+        // Speeds up redrawing of table when changing window size
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000;    // Turn on WS_EX_COMPOSITED
+                return cp;
+            }
+        }
     }
 
     public class ColorData : IResettable
@@ -320,7 +408,7 @@ namespace CourseSearcher
         }
         public void Reset()
         {
-            HoverColor = DefaultHighlightColor;
+            HoverColor = DefaultHoverColor;
             SelectColor = DefaultSelectColor;
             HighLightColor = DefaultHighlightColor;
         }

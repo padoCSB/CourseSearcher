@@ -4,7 +4,7 @@
     <_LastSelectedProfileId>E:\Repositories\CourseSearcher\CourseSearcher\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="ButtonColumn.cs">
+    <Compile Update="TimeColumn.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="FilterSchoolsForm.cs">

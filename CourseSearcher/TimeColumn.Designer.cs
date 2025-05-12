@@ -1,6 +1,6 @@
 ﻿namespace CourseSearcher
 {
-    partial class ButtonColumn
+    partial class TimeColumn
     {
         /// <summary> 
         /// Required designer variable.

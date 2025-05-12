@@ -10,80 +10,86 @@ using System.Windows.Forms;
 
 namespace CourseSearcher
 {
-    public partial class ButtonColumn : UserControl
+    public partial class TimeColumn : UserControl
     {
-        int tlpRow = -1;
+        int currentRow = -1;
         bool isMouseDown = false;
-        public List<int> selectedRow = new List<int>();
+        List<int> selectedRow = new List<int>();
         List<int> tempRows = new List<int>();
 
         public ColorData ColorData = new ColorData();
-        public ButtonColumn()
+        public TimeColumn()
         {
             InitializeComponent();
 
             tableLayoutPanel1.CellPaint += tableLayoutPanel1_CellPaint;
-            tableLayoutPanel1.MouseMove += tableLayoutPanel1_MouseMove;
-            tableLayoutPanel1.MouseLeave += tableLayoutPanel1_MouseLeave;
-            tableLayoutPanel1.MouseMove += TableLayoutPanel1_MouseMove;
-            tableLayoutPanel1.MouseDown += TableLayoutPanel1_MouseDown1;
-            tableLayoutPanel1.MouseUp += TableLayoutPanel1_MouseUp;
-            this.Invalidated += ButtonColumn_Invalidated;
+            this.Invalidated += (x,y) => tableLayoutPanel1.Invalidate();
         }
 
-        private void ButtonColumn_Invalidated(object? sender, InvalidateEventArgs e)
-        {
-            tableLayoutPanel1.Invalidate();
-        }
-
-        private void TableLayoutPanel1_MouseUp(object? sender, MouseEventArgs e)
+        #region MouseEvents
+        public void MouseUpOnPanel(Point point)
         {
             isMouseDown = false;
             tempRows.Clear();
         }
 
-        private void TableLayoutPanel1_MouseDown1(object? sender, EventArgs e)
+        public void MouseDownOnPanel(Point point)
         {
             isMouseDown = true;
-            if (selectedRow.Contains(tlpRow))
+            if (selectedRow.Contains(currentRow))
             {
-                selectedRow.Remove(tlpRow);
+                selectedRow.Remove(currentRow);
             }
             else
             {
-                selectedRow.Add(tlpRow);
+                selectedRow.Add(currentRow);
             }
-            tempRows.Add(tlpRow);
+            tempRows.Add(currentRow);
             tableLayoutPanel1.Invalidate();
         }
 
-        private void TableLayoutPanel1_MouseMove(object? sender, MouseEventArgs e)
+        public void MouseMoveOnPanel(Point position, bool mouseDown)
         {
-            if (isMouseDown)
+            SetCurrentRow(tableLayoutPanel1, tableLayoutPanel1.PointToClient(position));
+
+            if (mouseDown)
             {
-                if (tempRows.Contains(tlpRow))
+                if (tempRows.Contains(currentRow))
                 {
                     return;
                 }
 
-                tempRows.Add(tlpRow);
-                if (selectedRow.Contains(tlpRow))
+                tempRows.Add(currentRow);
+                if (selectedRow.Contains(currentRow))
                 {
-                    selectedRow.Remove(tlpRow);
+                    selectedRow.Remove(currentRow);
                 }
                 else
                 {
-                    selectedRow.Add(tlpRow);
+                    selectedRow.Add(currentRow);
                 }
                 tableLayoutPanel1.Invalidate();
             }
         }
 
+        public void MouseLeftPanel(Point position)
+        {
+            Point tplPoint = tableLayoutPanel1.PointToClient(position);
+            if (!tableLayoutPanel1.ClientRectangle.Contains(tplPoint))
+                currentRow = -1;
+            tableLayoutPanel1.Invalidate();
+        }
+        #endregion
+
+        public void AddToSelected(int index)
+        {
+            selectedRow.Add(index);
+        }
         private void tableLayoutPanel1_CellPaint(object? sender, TableLayoutCellPaintEventArgs e)
         {
             if (selectedRow.Contains(e.Row))
             {
-                if(e.Row == tlpRow){
+                if(e.Row == currentRow){
                     using (SolidBrush brush = new SolidBrush(ColorData.HoverColor))
                         e.Graphics.FillRectangle(brush, e.CellBounds);
                 }
@@ -96,13 +102,13 @@ namespace CourseSearcher
             }
             else
             {
-                if (e.Row == tlpRow)
+                if (e.Row == currentRow)
                     using (SolidBrush brush = new SolidBrush(ColorData.HighLightColor))
                         e.Graphics.FillRectangle(brush, e.CellBounds);
             }
         }
 
-        bool testTLP(TableLayoutPanel tlp, Point pt)
+        bool SetCurrentRow(TableLayoutPanel tlp, Point pt)
         {
             var rs = tlp.RowStyles;
             var rh = 0f;
@@ -111,13 +117,13 @@ namespace CourseSearcher
                 float height = (rs[i].Height / 100 * tlp.Bounds.Height);
                 if (pt.Y >= rh && pt.Y <= rh + height)
                 {
-                    if (tlpRow == i)
+                    if (currentRow == i)
                     {
                         return false;
                     }
-                    if (tlpRow != i)
+                    if (currentRow != i)
                     {
-                        tlpRow = i;
+                        currentRow = i;
                         tlp.Invalidate();
                         return true;
                     }
@@ -125,21 +131,10 @@ namespace CourseSearcher
                 rh += height;
             }
 
-            tlpRow = -1;
+            currentRow = -1;
             return false;
         }
 
-        private void tableLayoutPanel1_MouseMove(object? sender, MouseEventArgs e)
-        {
-            testTLP(tableLayoutPanel1, e.Location);
-        }
-
-        private void tableLayoutPanel1_MouseLeave(object? sender, EventArgs e)
-        {
-            Point tplPoint = tableLayoutPanel1.PointToClient(Control.MousePosition);
-            if (!tableLayoutPanel1.ClientRectangle.Contains(tplPoint)) tlpRow = -1;
-            tableLayoutPanel1.Invalidate();
-        }
         public void Clear()
         {
             selectedRow.Clear();
