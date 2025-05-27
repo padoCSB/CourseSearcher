@@ -12,6 +12,7 @@ namespace CourseSearcher
         private ColorData? colorData = new ColorData();
         private List<TimeColumn> interactedColumns = new List<TimeColumn>();
         private TimeColumn? latestColumn;
+        bool addSlot = false;
         private ColorData ColorData
         {
             get
@@ -75,6 +76,7 @@ namespace CourseSearcher
             }
 
             latestColumn = null;
+            addSlot = false;
         }
 
         private void Gmh_MouseDown(Point point)
@@ -87,7 +89,9 @@ namespace CourseSearcher
                     interactedColumns.Add(column);
                 }
 
-                column.MouseDownOnPanel(point);
+                addSlot = !column.RowIsSelected();
+
+                column.MouseDownOnPanel(point, addSlot);
 
                 latestColumn = column;
             }
@@ -104,7 +108,7 @@ namespace CourseSearcher
                     if (!interactedColumns.Contains(column))
                     {
                         interactedColumns.Add(column);
-                        column.MouseDownOnPanel(point);
+                        column.MouseDownOnPanel(point, addSlot);
                     }
                 }
 
@@ -118,7 +122,7 @@ namespace CourseSearcher
                     latestColumn = column;
                 }
 
-                column.MouseMoveOnPanel(point, isPressed);
+                column.MouseMoveOnPanel(point, isPressed, addSlot);
             }
             else if (latestColumn != null)
             {
@@ -220,12 +224,11 @@ namespace CourseSearcher
             bool applying = false;
             BlockedTime time = new BlockedTime();
             List<BlockedTime> allBlockedTimes = new List<BlockedTime>();
-            int div = 6;
             for (int i = 0; i < a.Count; i++)
             {
                 // Each hour is made up of 'div' slots
-                int hour = 8 + (int)Math.Floor((float)i / div);
-                int minute = (60 / div) * (i % div);
+                int hour = 8 + (int)Math.Floor((float)i / Div);
+                int minute = (60 / Div) * (i % Div);
 
                 if (a[i] && !applying)
                 {

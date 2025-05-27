@@ -33,22 +33,26 @@ namespace CourseSearcher
             tempRows.Clear();
         }
 
-        public void MouseDownOnPanel(Point point)
+        public void MouseDownOnPanel(Point point, bool addRow)
         {
             isMouseDown = true;
-            if (selectedRow.Contains(currentRow))
+            if (selectedRow.Contains(currentRow) && !addRow)
             {
                 selectedRow.Remove(currentRow);
             }
-            else
+            if(addRow && !selectedRow.Contains(currentRow))
             {
                 selectedRow.Add(currentRow);
             }
             tempRows.Add(currentRow);
             tableLayoutPanel1.Invalidate();
         }
+        public bool RowIsSelected()
+        {
+            return selectedRow.Contains(currentRow);
+        }
 
-        public void MouseMoveOnPanel(Point position, bool mouseDown)
+        public void MouseMoveOnPanel(Point position, bool mouseDown, bool addSlot)
         {
             SetCurrentRow(tableLayoutPanel1, tableLayoutPanel1.PointToClient(position));
 
@@ -60,11 +64,11 @@ namespace CourseSearcher
                 }
 
                 tempRows.Add(currentRow);
-                if (selectedRow.Contains(currentRow))
+                if (selectedRow.Contains(currentRow) && !addSlot)
                 {
                     selectedRow.Remove(currentRow);
                 }
-                else
+                if(addSlot && !selectedRow.Contains(currentRow))
                 {
                     selectedRow.Add(currentRow);
                 }
